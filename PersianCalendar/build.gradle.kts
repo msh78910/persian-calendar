@@ -1,4 +1,5 @@
 import groovy.json.JsonSlurper
+import io.github.persiancalendar.gradle.DependenciesPlugin
 import org.codehaus.groovy.runtime.ProcessGroovyMethods
 
 operator fun File.div(child: String) = File(this, child)
@@ -12,6 +13,7 @@ plugins {
     kotlin("android")
     kotlin("kapt")
     id("androidx.navigation.safeargs.kotlin")
+    id("io.github.persiancalendar.dependencies")
 }
 
 if (isNightlyBuild) {
@@ -177,15 +179,18 @@ val minApi21Implementation by configurations
 val nightlyImplementation by configurations
 
 dependencies {
-    implementation("com.github.persian-calendar:equinox:2.0.0")
-    implementation("com.github.persian-calendar:calendar:1.2.0")
-    implementation("com.github.persian-calendar:praytimes:2.1.2")
+    DependenciesPlugin.persianCalendarGroupDeps.forEach {
+        implementation(it)
+    }
 
     // For development builds only
-    nightlyImplementation(platform("com.google.firebase:firebase-bom:29.1.0"))
-    nightlyImplementation("com.google.firebase:firebase-analytics-ktx")
-    nightlyImplementation("com.google.firebase:firebase-crashlytics-ktx")
-    nightlyImplementation("com.google.firebase:firebase-perf-ktx")
+    DependenciesPlugin.firebaseDeps.forEach {
+        if (it == DependenciesPlugin.firebaseDeps.first()) {
+            nightlyImplementation(platform(it))
+        } else {
+            nightlyImplementation(it)
+        }
+    }
 
     implementation("androidx.appcompat:appcompat:1.4.1")
     implementation("androidx.preference:preference-ktx:1.2.0")
